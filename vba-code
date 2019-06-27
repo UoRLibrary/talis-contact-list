@@ -1,0 +1,222 @@
+Option Explicit
+
+Sub extract_talis_contacts()
+'Created by Ian Chilvers 2018
+'University of Reading Library
+'Updated May 2019
+
+Application.ScreenUpdating = False
+
+'Declare initial variables
+    Dim dirPath As String
+    Dim listWb, userWb, contactWb As Workbook
+    Dim listWs, userWs, contactWs As Worksheet
+    Dim listTb, userTb, contactTb As ListObject
+
+'Open workbooks and create tables
+    dirPath = ActiveWorkbook.Path
+    'Open lists.csv
+    If Dir(dirPath & "\lists.csv") <> "" Then
+        Set listWb = Workbooks.Open(dirPath & "\lists.csv")
+    Else
+        MsgBox "Error" & vbNewLine & "File lists.csv not found" & vbNewLine & vbNewLine & "Please ensure that lists.csv exists in the same folder as this file and try again"
+        Exit Sub
+    End If
+    Set listWs = listWb.Worksheets(1)
+    Set listTb = listWs.ListObjects.Add(xlSrcRange, Range(Cells(1, 1), Cells(LastRow(), LastCol())))
+    'Open users.csv
+    If Dir(dirPath & "\users.csv") <> "" Then
+        Set userWb = Workbooks.Open(dirPath & "\users.csv")
+    Else
+        MsgBox "Error" & vbNewLine & "File users.csv not found" & vbNewLine & vbNewLine & "Please ensure that lists.csv exists in the same folder as this file and try again"
+        listWb.Close savechanges:=False
+        Exit Sub
+    End If
+    Set userWs = userWb.Worksheets(1)
+    Set userTb = userWs.ListObjects.Add(xlSrcRange, Range(Cells(1, 1), Cells(LastRow(), LastCol())))
+    
+    'Delete existing contacts.xlsx file
+    If Dir(dirPath & "\contacts.xlsx") <> "" Then
+        Kill (dirPath & "\contacts.xlsx")
+    End If
+    'Create new contacts workbook and table
+    Set contactWb = Workbooks.Add
+    Set contactWs = contactWb.Worksheets(1)
+    contactWs.Name = "contacts"
+    Set contactTb = contactWs.ListObjects.Add(xlSrcRange, Range("A1:Y2"), , xlYes)
+    contactTb.HeaderRowRange(1).Value = "List Owner"
+    contactTb.HeaderRowRange(2).Value = "Full Name"
+    contactTb.HeaderRowRange(3).Value = "First Name"
+    contactTb.HeaderRowRange(4).Value = "Last Name"
+    contactTb.HeaderRowRange(5).Value = "Email"
+    contactTb.HeaderRowRange(6).Value = "List 1"
+    contactTb.HeaderRowRange(7).Value = "List 1 Link"
+    contactTb.HeaderRowRange(8).Value = "List 2"
+    contactTb.HeaderRowRange(9).Value = "List 2 Link"
+    contactTb.HeaderRowRange(10).Value = "List 3"
+    contactTb.HeaderRowRange(11).Value = "List 3 Link"
+    contactTb.HeaderRowRange(12).Value = "List 4"
+    contactTb.HeaderRowRange(13).Value = "List 4 Link"
+    contactTb.HeaderRowRange(14).Value = "List 5"
+    contactTb.HeaderRowRange(15).Value = "List 5 Link"
+    contactTb.HeaderRowRange(16).Value = "List 6"
+    contactTb.HeaderRowRange(17).Value = "List 6 Link"
+    contactTb.HeaderRowRange(18).Value = "List 7"
+    contactTb.HeaderRowRange(19).Value = "List 7 Link"
+    contactTb.HeaderRowRange(20).Value = "List 8"
+    contactTb.HeaderRowRange(21).Value = "List 8 Link"
+    contactTb.HeaderRowRange(22).Value = "List 9"
+    contactTb.HeaderRowRange(23).Value = "List 9 Link"
+    contactTb.HeaderRowRange(24).Value = "List 10"
+    contactTb.HeaderRowRange(25).Value = "List 10 Link"
+
+'Declare additional variables
+    Dim str, firstName, lastName As String
+    Dim i, pos, lth As Long
+    Dim listOwner, listTitle, listLink As Range
+    Dim userFullname, userEmail As Range
+    Dim contactFullname, contactFirstname, contactLastname, contactEmail, contactListOwner As Range
+    Dim contactList1, contactList1Link, contactList2, contactList2Link, contactList3, contactList3Link, contactList4, contactList4Link, contactList5, contactList5Link, _
+        contactList6, contactList6Link, contactList7, contactList7Link, contactList8, contactList8Link, contactList9, contactList9Link, contactList10, contactList10Link _
+        As Range
+
+'Set range variable values
+    Set listOwner = listTb.ListColumns("List Owner").DataBodyRange
+    Set listTitle = listTb.ListColumns("Title").DataBodyRange
+    Set listLink = listTb.ListColumns("List Link").DataBodyRange
+    Set contactFullname = contactTb.ListColumns("Full Name").DataBodyRange
+    Set contactFirstname = contactTb.ListColumns("First Name").DataBodyRange
+    Set contactLastname = contactTb.ListColumns("Last Name").DataBodyRange
+    Set contactEmail = contactTb.ListColumns("Email").DataBodyRange
+    Set contactListOwner = contactTb.ListColumns("List Owner").DataBodyRange
+    Set contactList1 = contactTb.ListColumns("List 1").DataBodyRange
+    Set contactList1Link = contactTb.ListColumns("List 1 Link").DataBodyRange
+    Set contactList2 = contactTb.ListColumns("List 2").DataBodyRange
+    Set contactList2Link = contactTb.ListColumns("List 2 Link").DataBodyRange
+    Set contactList3 = contactTb.ListColumns("List 3").DataBodyRange
+    Set contactList3Link = contactTb.ListColumns("List 3 Link").DataBodyRange
+    Set contactList4 = contactTb.ListColumns("List 4").DataBodyRange
+    Set contactList4Link = contactTb.ListColumns("List 4 Link").DataBodyRange
+    Set contactList5 = contactTb.ListColumns("List 5").DataBodyRange
+    Set contactList5Link = contactTb.ListColumns("List 5 Link").DataBodyRange
+    Set contactList6 = contactTb.ListColumns("List 6").DataBodyRange
+    Set contactList6Link = contactTb.ListColumns("List 6 Link").DataBodyRange
+    Set contactList7 = contactTb.ListColumns("List 7").DataBodyRange
+    Set contactList7Link = contactTb.ListColumns("List 7 Link").DataBodyRange
+    Set contactList8 = contactTb.ListColumns("List 8").DataBodyRange
+    Set contactList8Link = contactTb.ListColumns("List 8 Link").DataBodyRange
+    Set contactList9 = contactTb.ListColumns("List 9").DataBodyRange
+    Set contactList9Link = contactTb.ListColumns("List 9 Link").DataBodyRange
+    Set contactList10 = contactTb.ListColumns("List 10").DataBodyRange
+    Set contactList10Link = contactTb.ListColumns("List 10 Link").DataBodyRange
+    Set userEmail = userTb.ListColumns("Email").DataBodyRange
+    Set userFullname = userTb.ListColumns("Name").DataBodyRange 'The user data spreadsheet uses the header Name to mean Full Name
+        
+'Delete rows from listTb where List Owner column is empty
+    'Not interested in emailing nobody
+    'Delete from bottom of table up to avoid missing rows
+    On Error Resume Next
+    For i = listTb.ListRows.Count To 1 Step -1
+        If listOwner(i).Value = "" Then
+            listTb.ListRows(i).Delete
+        End If
+    Next i
+        
+'Get List Owner names from listWb
+    'Also reorders the name and splits the first and lastname into separate fields
+    'Enforces proper case for the first names, but not last names (e.g McDonald)
+    For i = 1 To listTb.ListRows.Count
+        str = listOwner(i).Value
+        pos = InStr(str, ",")
+        lth = Len(listOwner(i))
+        firstName = Mid(str, pos + 2, lth)
+        lastName = Left(str, pos)
+        contactListOwner(i).Value = str
+        contactFullname(i).Value = Left(firstName & " " & lastName, lth - 1)
+        contactFirstname(i).Value = StrConv(firstName, vbProperCase)
+        contactLastname(i).Value = Left(lastName, Len(lastName) - 1)
+    Next i
+
+'Remove duplicates and sort
+    'Only want to email contacts once
+    Dim colIndex As Integer
+    colIndex = contactTb.ListColumns("List Owner").Index
+    contactTb.Range.RemoveDuplicates Columns:=Array(colIndex), Header:=xlYes
+    contactTb.Range.Sort Key1:=contactTb.Range.Columns(colIndex), Header:=xlYes
+
+'Insert matched lists and list links into contactTb
+    'Function at end of file
+    'Number of sub calls (and corresponding arguments used) should match the number (and names) of the "List #" and "List # Link" columns created for contactTb object
+    Call indexMatchDelete(contactTb, listTb, contactListOwner, listOwner, contactList1, listTitle, contactList1Link, listLink)
+    Call indexMatchDelete(contactTb, listTb, contactListOwner, listOwner, contactList2, listTitle, contactList2Link, listLink)
+    Call indexMatchDelete(contactTb, listTb, contactListOwner, listOwner, contactList3, listTitle, contactList3Link, listLink)
+    Call indexMatchDelete(contactTb, listTb, contactListOwner, listOwner, contactList4, listTitle, contactList4Link, listLink)
+    Call indexMatchDelete(contactTb, listTb, contactListOwner, listOwner, contactList5, listTitle, contactList5Link, listLink)
+    Call indexMatchDelete(contactTb, listTb, contactListOwner, listOwner, contactList6, listTitle, contactList6Link, listLink)
+    Call indexMatchDelete(contactTb, listTb, contactListOwner, listOwner, contactList7, listTitle, contactList7Link, listLink)
+    Call indexMatchDelete(contactTb, listTb, contactListOwner, listOwner, contactList8, listTitle, contactList8Link, listLink)
+    Call indexMatchDelete(contactTb, listTb, contactListOwner, listOwner, contactList9, listTitle, contactList9Link, listLink)
+    Call indexMatchDelete(contactTb, listTb, contactListOwner, listOwner, contactList10, listTitle, contactList10Link, listLink)
+    
+'Split userTb Email column
+    'Some user email data from users.csv contains multiple emails
+    'This script will only use the first email by spliting the field before calling the indexMatch function
+    Application.DisplayAlerts = False
+    userEmail.TextToColumns _
+        Destination:=userEmail(1), DataType:=xlDelimited, Semicolon:=True
+    Application.DisplayAlerts = True
+
+'Insert matched user email into contactTb
+    'Function at end of file
+    Call indexMatch(contactTb, contactFullname, userFullname, contactEmail, userEmail)
+
+'Finish up
+    listWb.Close savechanges:=False
+    userWb.Close savechanges:=False
+    contactWs.Columns.AutoFit
+    contactWb.SaveAs Filename:=dirPath & "\contacts.xlsx"
+    MsgBox "Success!" & vbNewLine & "User contact and list information extracted to contacts.xlsx" _
+        & vbNewLine & vbNewLine & "Please check names and email addresses"
+    ThisWorkbook.Close
+
+Application.ScreenUpdating = True
+
+End Sub
+
+Function LastRow() As Long
+    LastRow = Cells(Rows.Count, 1).End(xlUp).Row
+End Function
+
+Function LastCol() As Long
+    LastCol = Cells(1, Columns.Count).End(xlToLeft).Column
+End Function
+
+Private Sub indexMatch(resultTb, lookupValue, searchArray, resultCell, targetCell)
+    Dim i As Long, matchVal
+    
+    For i = 1 To resultTb.ListRows.Count
+        matchVal = Application.Match(lookupValue(i).Value, searchArray, 0)
+        
+        If Not IsError(matchVal) Then
+            resultCell(i).Value = targetCell(matchVal).Value
+        End If
+        
+    Next i
+End Sub
+
+Private Sub indexMatchDelete(resultTb, targetTb, lookupValue, searchArray, resultCell_1, targetCell_1, Optional resultCell_2, Optional targetCell_2)
+    Dim i As Long, matchVal
+    
+    For i = 1 To resultTb.ListRows.Count
+        matchVal = Application.Match(lookupValue(i).Value, searchArray, 0)
+        
+        If Not IsError(matchVal) Then
+            resultCell_1(i).Value = targetCell_1(matchVal).Value
+            resultCell_2(i).Value = targetCell_2(matchVal).Value
+            targetTb.ListRows(matchVal).Delete
+        End If
+        
+    Next i
+End Sub
+
+
