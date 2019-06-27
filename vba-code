@@ -23,7 +23,7 @@ Application.ScreenUpdating = False
         Exit Sub
     End If
     Set listWs = listWb.Worksheets(1)
-    Set listTb = listWs.ListObjects.Add(xlSrcRange, Range(Cells(1, 1), Cells(LastRow(), LastCol())))
+    Set listTb = listWs.ListObjects.Add(xlSrcRange, Range(Cells(1, 1), Cells(LastRow(), LastCol())), XlListObjectHasHeaders:=xlYes)
     'Open users.csv
     If Dir(dirPath & "\users.csv") <> "" Then
         Set userWb = Workbooks.Open(dirPath & "\users.csv")
@@ -33,7 +33,7 @@ Application.ScreenUpdating = False
         Exit Sub
     End If
     Set userWs = userWb.Worksheets(1)
-    Set userTb = userWs.ListObjects.Add(xlSrcRange, Range(Cells(1, 1), Cells(LastRow(), LastCol())))
+    Set userTb = userWs.ListObjects.Add(xlSrcRange, Range(Cells(1, 1), Cells(LastRow(), LastCol())), XlListObjectHasHeaders:=xlYes)
     
     'Delete existing contacts.xlsx file
     If Dir(dirPath & "\contacts.xlsx") <> "" Then
